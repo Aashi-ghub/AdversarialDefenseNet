@@ -20,6 +20,7 @@ class PathConfig:
     logs_dir: str = "outputs/logs"
     plots_dir: str = "outputs/plots"
     metrics_dir: str = "outputs/metrics"
+    reports_dir: str = "outputs/reports"
 
     def resolve(self, value: str) -> Path:
         return (Path(self.project_root) / value).resolve()
@@ -62,12 +63,12 @@ class AttackConfig:
 class ExperimentConfig:
     seed: int = 42
     num_classes: int = 10
-    train_epochs: int = 5
-    adv_train_epochs: int = 5
+    train_epochs: int = 8
+    adv_train_epochs: int = 6
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
     use_amp: bool = True
     run_models: tuple[str, ...] = ("cnn", "resnet18")
-    adv_models: tuple[str, ...] = ("cnn", "resnet18")
+    adv_models: tuple[str, ...] = ("cnn",)
 
 
 @dataclass
@@ -87,6 +88,7 @@ class ProjectConfig:
             self.paths.logs_dir,
             self.paths.plots_dir,
             self.paths.metrics_dir,
+            self.paths.reports_dir,
         ]
         for directory in directories:
             self.paths.resolve(directory).mkdir(parents=True, exist_ok=True)

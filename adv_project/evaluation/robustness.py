@@ -4,9 +4,43 @@ from functools import partial
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from attacks.fgsm import fgsm_attack
 from attacks.pgd import pgd_attack
+
+
+def build_attack_fn(
+    attack_name: str,
+    epsilon: float,
+    mean,
+    std,
+    alpha: float | None = None,
+    steps: int = 7,
+):
+    attack_name = attack_name.lower()
+    if attack_name == "fgsm":
+        return partial(fgsm_attack, epsilon=epsilon, mean=mean, std=std)
+    if attack_name == "pgd":
+        attack_alpha = alpha if alpha is not None else max(epsilon / 4, 1 / 255)
+        return partial(
+            pgd_attack,
+            epsilon=epsilon,
+            alpha=attack_alpha,
+            steps=steps,
+            mean=mean,
+            std=std,
+            random_start=True,
+        )
+    raise ValueError("attack_name must be either 'fgsm' or 'pgd'.")
+
+
+def predict_probabilities(model, images):
+    logits = model(images)
+    probabilities = F.softmax(logits, dim=1)
+    predictions = probabilities.argmax(dim=1)
+    confidences = probabilities.max(dim=1).values
+    return logits, probabilities, predictions, confidences
 
 
 def evaluate_clean(model, data_loader, device, criterion=None):
@@ -73,8 +107,8 @@ def robustness_suite(model, data_loader, device, config, criterion=None):
         model,
         data_loader,
         device,
-        partial(
-            fgsm_attack,
+        build_attack_fn(
+            attack_name="fgsm",
             epsilon=config.attack.fgsm_epsilon,
             mean=config.data.mean,
             std=config.data.std,
@@ -85,14 +119,13 @@ def robustness_suite(model, data_loader, device, config, criterion=None):
         model,
         data_loader,
         device,
-        partial(
-            pgd_attack,
+        build_attack_fn(
+            attack_name="pgd",
             epsilon=config.attack.pgd_epsilon,
             alpha=config.attack.pgd_alpha,
             steps=config.attack.pgd_steps,
             mean=config.data.mean,
             std=config.data.std,
-            random_start=True,
         ),
         criterion,
     )
@@ -120,21 +153,14 @@ def accuracy_vs_epsilon(
 ):
     accuracies = []
     for epsilon in epsilons:
-        if attack_name.lower() == "fgsm":
-            attack_fn = partial(fgsm_attack, epsilon=epsilon, mean=mean, std=std)
-        elif attack_name.lower() == "pgd":
-            attack_alpha = alpha if alpha is not None else max(epsilon / 4, 1 / 255)
-            attack_fn = partial(
-                pgd_attack,
-                epsilon=epsilon,
-                alpha=attack_alpha,
-                steps=steps,
-                mean=mean,
-                std=std,
-                random_start=True,
-            )
-        else:
-            raise ValueError("attack_name must be either 'fgsm' or 'pgd'.")
+        attack_fn = build_attack_fn(
+            attack_name=attack_name,
+            epsilon=epsilon,
+            alpha=alpha,
+            steps=steps,
+            mean=mean,
+            std=std,
+        )
 
         metrics = evaluate_under_attack(model, data_loader, device, attack_fn)
         accuracies.append(metrics["accuracy"])

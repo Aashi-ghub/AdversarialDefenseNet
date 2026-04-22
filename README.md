@@ -7,9 +7,11 @@ This repository contains a complete PyTorch project for studying adversarial rob
 - Custom CNN baseline and ResNet-18 classifier
 - Clean training with checkpointing, metric logging, and learning-rate scheduling
 - FGSM and PGD adversarial attacks
-- PGD-based adversarial training
+- PGD-based adversarial training for CNN defense
 - Robustness evaluation on clean, FGSM, and PGD settings
-- Training curves, robustness curves, and adversarial image visualizations
+- Model comparison tables and automatic analysis insights
+- Training curves, robustness curves, grouped comparison charts, perturbation heatmaps, and misclassification visualizations
+- Interactive Gradio demo for uploaded images
 - Colab notebook that runs the full workflow step by step
 
 ## Structure
@@ -20,6 +22,7 @@ adv_project/
 ├── training/
 ├── attacks/
 ├── evaluation/
+├── ui/
 ├── utils/
 ├── checkpoints/
 ├── outputs/
