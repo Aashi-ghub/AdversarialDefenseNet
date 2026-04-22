@@ -1,0 +1,23 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Notebook artifacts
+.ipynb_checkpoints/
+
+# Project outputs
+adv_project/checkpoints/*
+!adv_project/checkpoints/.gitkeep
+adv_project/outputs/*
+!adv_project/outputs/.gitkeep
+adv_project/data/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
