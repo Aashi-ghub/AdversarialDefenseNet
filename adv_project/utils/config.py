@@ -31,6 +31,8 @@ class DataConfig:
     batch_size: int = 128
     num_workers: int = 2
     validation_split: float = 0.1
+    train_subset_size: int | None = None
+    val_subset_size: int | None = None
     image_size: int = 32
     pin_memory: bool = True
     mean: tuple[float, float, float] = CIFAR10_MEAN
@@ -63,12 +65,12 @@ class AttackConfig:
 class ExperimentConfig:
     seed: int = 42
     num_classes: int = 10
-    train_epochs: int = 8
-    adv_train_epochs: int = 6
+    train_epochs: int = 2
+    adv_train_epochs: int = 1
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
     use_amp: bool = True
-    run_models: tuple[str, ...] = ("cnn", "resnet18")
-    adv_models: tuple[str, ...] = ("cnn",)
+    run_models: tuple[str, ...] = ("cnn",)
+    adv_models: tuple[str, ...] = ()
 
 
 @dataclass

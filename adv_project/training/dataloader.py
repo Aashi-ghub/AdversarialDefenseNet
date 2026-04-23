@@ -50,6 +50,11 @@ def get_cifar10_dataloaders(config: ProjectConfig):
     train_indices = indices[num_val:]
     val_indices = indices[:num_val]
 
+    if config.data.train_subset_size is not None:
+        train_indices = train_indices[: min(len(train_indices), config.data.train_subset_size)]
+    if config.data.val_subset_size is not None:
+        val_indices = val_indices[: min(len(val_indices), config.data.val_subset_size)]
+
     train_subset = Subset(train_dataset, train_indices)
     val_subset = Subset(validation_dataset, val_indices)
 
